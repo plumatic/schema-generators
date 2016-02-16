@@ -9,7 +9,7 @@ A Clojure(Script) library for data generation and generative testing with [https
 This library provides two experimental forms of automatic test data generation from schemas.
 
 ```clojure
-(require '[schema.experimental.complete :as c] '[schema.experimental.generators :as g])
+(require '[schema-generators.complete :as c] '[schema-generators.generators :as g])
 
 (g/sample 3 Animal)
 ;; => ({:name "", :barks? false, :type :dog}
@@ -24,16 +24,16 @@ This library provides two experimental forms of automatic test data generation f
 ;; => {:name "nL@", :barks? false, :type :dog}
 ```
 
-The `schema.experimental.generators` namespace can compile Schemas into `clojure.test.check` generators.  All of the built-in
+The `schema-generators.generators` namespace can compile Schemas into `clojure.test.check` generators.  All of the built-in
 schemas are supported out of the box, and it is easy to extend to add new types or customize generation on a per-type basis.
-See [`schema.experimental.generators-test`](https://github.com/plumatic/schema/blob/master/test/clj/schema/experimental/generators_test.clj)
+See [`schema-generators.generators-test`](https://github.com/plumatic/schema/blob/master/test/clj/schema/experimental/generators_test.clj)
 for some more complex examples.
 
-Moreover, the `schema.experimental.complete` namespace can build on generation to allow "completion" of partial data.  Whereas generators and
+Moreover, the `schema-generators.complete` namespace can build on generation to allow "completion" of partial data.  Whereas generators and
 `clojure.test.check` are very useful tools for abstract property testing, `completers` are useful when we want to test the behavior of a
 function on a *specific* complex data structure, where only some parts of the data structure are relevant for the function under test.
 Completion supports all of the extensibility of generators, plus the ability to provide coercions to create very succinct helpers for
-test data generation.  See [`schema.experimental.complete-test`](https://github.com/plumatic/schema/blob/master/test/clj/schema/experimental/complete_test.clj)
+test data generation.  See [`schema-generators.complete-test`](https://github.com/plumatic/schema/blob/master/test/clj/schema/experimental/complete_test.clj)
 for examples.
 
 
