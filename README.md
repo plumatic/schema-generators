@@ -2,7 +2,7 @@
 
 A Clojure(Script) library for data generation and generative testing with [https://github.com/plumatic/schema](Schema) and `clojure.test.check`.
 
-[![Clojars Project](http://clojars.org/prismatic/schema/latest-version.svg)](http://clojars.org/prismatic/schema-generators)
+[![Clojars Project](http://clojars.org/prismatic/schema-generators/latest-version.svg)](http://clojars.org/prismatic/schema-generators)
 
 --
 
