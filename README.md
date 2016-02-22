@@ -4,6 +4,9 @@ A Clojure(Script) library for data generation and generative testing with [https
 
 [![Clojars Project](http://clojars.org/prismatic/schema-generators/latest-version.svg)](http://clojars.org/prismatic/schema-generators)
 
+**This is an alpha release. The API and organizational structure are
+subject to change. Comments and contributions are much appreciated.**
+
 --
 
 This library provides two experimental forms of automatic test data generation from schemas.
