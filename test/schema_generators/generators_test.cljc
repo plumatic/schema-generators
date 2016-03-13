@@ -49,10 +49,6 @@
       (testing (str leaf-schema)
         (is (= 10 (count (generators/sample 10 leaf-schema)))))))
 
-(def generators-are-valid
-  (properties/for-all [x (generators/generator OGSchema)]
-                      (not (s/check OGSchema x))))
-
 (defspec spec-test
   #?(:clj 100
      :cljs 50) ;; TODO: test hangs if we run this too many times in cljs
