@@ -88,7 +88,7 @@
       (let [c (spec/checker (s/spec s) params)
             coercer (or (coercion-matcher s) identity)
             completr (completer* (s/spec s) s c [leaf-generators wrappers])]
-        (fn [x]()
+        (fn [x]
           (macros/try-catchall
            (let [v (coercer x)]
              (if (utils/error? v)
