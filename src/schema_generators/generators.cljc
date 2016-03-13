@@ -5,15 +5,18 @@
    TODO: add cljs support."
   (:require
    [clojure.test.check.generators :as generators]
-   [schema.spec.core :as spec]
+   [schema.spec.core :as spec :include-macros true]
    schema.spec.collection
    schema.spec.leaf
    schema.spec.variant
-   [schema.core :as s]
-   [schema.macros :as macros]))
+   [schema.core :as s :include-macros true]
+   #?(:clj [schema.macros :as macros]))
+  #?(:cljs (:require-macros [schema.macros :as macros] schema.core)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Private helpers for composite schemas
+;; (enable-console-print!)
+;; (print macros/safe-get)
 
 (defn g-by [f & args]
   (generators/fmap
@@ -25,7 +28,8 @@
 
 (defn- sub-generator
   [{:keys [schema]}
-   {:keys [subschema-generator ^java.util.Map cache] :as params}]
+   {:keys [subschema-generator #?@(:clj [^java.util.Map cache]
+                                   :cljs [cache])] :as params}]
   (spec/with-cache cache schema
     (fn [d] (#'generators/make-gen (fn [r s] (generators/call-gen @d r (quot s 2)))))
     (fn [] (subschema-generator schema params))))
@@ -70,10 +74,6 @@
   (composite-generator [s params]
     (macros/assert! false "You must provide a leaf generator for %s" s)))
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Public
-
 (def Schema
   "A Schema for Schemas"
   (s/protocol s/Schema))
@@ -86,17 +86,23 @@
   "A mapping from schemas to generating functions that should be used."
   (s/=> (s/maybe Generator) Schema))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Public
+
+
 (def +primitive-generators+
-  {Double generators/double
-   ;; using unchecked-float here will unfortunately generate a lot of
-   ;; infinities, since lots of doubles are out of the float range
-   Float (generators/fmap unchecked-float generators/double)
-   Long generators/large-integer
-   Integer (generators/fmap unchecked-int generators/large-integer)
-   Short (generators/fmap unchecked-short generators/large-integer)
-   Character (generators/fmap unchecked-char generators/large-integer)
-   Byte (generators/fmap unchecked-byte generators/large-integer)
-   Boolean generators/boolean})
+  #?(:clj {Double generators/double
+           ;; using unchecked-float here will unfortunately generate a lot of
+           ;; infinities, since lots of doubles are out of the float range
+           Float (generators/fmap unchecked-float generators/double)
+           Long generators/large-integer
+           Integer (generators/fmap unchecked-int generators/large-integer)
+           Short (generators/fmap unchecked-short generators/large-integer)
+           Character (generators/fmap unchecked-char generators/large-integer)
+           Byte (generators/fmap unchecked-byte generators/large-integer)
+           Boolean generators/boolean}
+     :cljs {}))
 
 (def +simple-leaf-generators+
   (merge
@@ -106,25 +112,30 @@
     s/Num (generators/one-of [generators/large-integer generators/double])
     s/Int (generators/one-of
            [generators/large-integer
-            (generators/fmap unchecked-int generators/large-integer)
-            (generators/fmap bigint generators/large-integer)])
+            #?@(:clj [(generators/fmap unchecked-int generators/large-integer)
+                      (generators/fmap bigint generators/large-integer)])])
     s/Keyword generators/keyword
-    clojure.lang.Keyword generators/keyword
+    #?(:clj clojure.lang.Keyword
+       :cljs cljs.core/Keyword) generators/keyword
     s/Symbol (generators/fmap (comp symbol name) generators/keyword)
-    Object generators/any
+    #?(:clj Object :cljs js/Object) generators/any
     s/Any generators/any
     s/Uuid generators/uuid
-    s/Inst (generators/fmap (fn [ms] (java.util.Date. ms)) generators/int)}
-   (into {}
-         (for [[f ctor c] [[doubles double-array Double]
-                           [floats float-array Float]
-                           [longs long-array Long]
-                           [ints int-array Integer]
-                           [shorts short-array Short]
-                           [chars char-array Character]
-                           [bytes byte-array Byte]
-                           [booleans boolean-array Boolean]]]
-           [f (generators/fmap ctor (generators/vector (macros/safe-get +primitive-generators+ c)))]))))
+    s/Inst (generators/fmap (fn [ms] (#?(:clj java.util.Date. :cljs js/Date.) ms)) generators/int)}
+   #?(:clj (into {}
+                 (for [[f ctor c] [[doubles double-array Double]
+                                   [floats float-array Float]
+                                   [longs long-array Long]
+                                   [ints int-array Integer]
+                                   [shorts short-array Short]
+                                   [chars char-array Character]
+                                   [bytes byte-array Byte]
+                                   [booleans boolean-array Boolean]]]
+                   [f (generators/fmap ctor
+                                       (generators/vector
+                                        (macros/safe-get
+                                         +primitive-generators+ c)))])))))
+
 
 (defn eq-generators [s]
   (when (instance? schema.core.EqSchema s)
@@ -189,14 +200,15 @@
                       (composite-generator (s/spec s) params))))]
        (generators/fmap
         (s/validator schema)
-        (gen schema {:subschema-generator gen :cache (java.util.IdentityHashMap.)})))))
+        (gen schema {:subschema-generator gen :cache #?(:clj (java.util.IdentityHashMap.)
+                                                        :cljs (atom {}))})))))
 
 (s/defn sample :- [s/Any]
   "Sample k elements from generator."
   [k & generator-args]
   (generators/sample (apply generator generator-args) k))
 
-(s/defn generate
+(s/defn generate :- s/Any
   "Sample a single element of low to moderate size."
   [& generator-args]
   (generators/generate (apply generator generator-args) 10))

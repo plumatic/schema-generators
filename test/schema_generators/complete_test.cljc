@@ -1,9 +1,10 @@
 (ns schema-generators.complete-test
-  (:use clojure.test)
+  #?(:clj (:use clojure.test))
   (:require
+   #?(:cljs [cljs.test :refer-macros [deftest is testing]])
    [schema.coerce :as coerce]
-   [schema.core :as s]
-   [schema.experimental.abstract-map :as abstract-map]
+   [schema.core :as s :include-macros true]
+   [schema.experimental.abstract-map :as abstract-map :include-macros true]
    [schema-generators.complete :as complete]))
 
 (deftest complete-test
@@ -26,11 +27,18 @@
 (abstract-map/extend-schema Cat Animal [:cat] {:claws? s/Bool})
 (abstract-map/extend-schema Dog Animal [:dog] {:barks? s/Bool})
 
+
 (s/defrecord User
     [id :- long
      cash :- double
      friends :- [User]
      pet :- (s/maybe Animal)])
+
+(comment
+
+
+
+
 
 (def complete-user
   (complete/completer
@@ -39,7 +47,8 @@
     Animal (fn [x] (if (keyword? x) {:type x} x))}))
 
 (defn pull-pattern-matcher [s]
-  (when (and (instance? clojure.lang.APersistentMap s)
+  (when (and #?(:clj (instance? clojure.lang.APersistentMap s)
+                :cljs (map? s))
              (not (s/find-extra-keys-schema s)))
     (fn [x]
       (select-keys x (->> s keys (map s/explicit-schema-key))))))
@@ -59,3 +68,4 @@
   (is (= {:id 10 :friends [{:id 2 :pet nil} {:id 3 :pet {:type :dog}}]}
          (pull {:id s/Any :friends [{:id long :pet (s/maybe {:type s/Keyword})}]}
                (complete-user {:id 10 :friends [{:id 2 :pet nil} {:id 3 :pet :dog}]})))))
+)
