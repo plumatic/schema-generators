@@ -99,7 +99,8 @@
            Character (generators/fmap unchecked-char generators/large-integer)
            Byte (generators/fmap unchecked-byte generators/large-integer)
            Boolean generators/boolean}
-     :cljs {}))
+     :cljs {js/Number (generators/one-of [generators/large-integer generators/double])
+            js/Boolean generators/boolean}))
 
 (def +simple-leaf-generators+
   (merge
