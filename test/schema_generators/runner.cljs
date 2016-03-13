@@ -7,5 +7,4 @@
             ))
 
 (doo-tests 'schema-generators.generators-test
-           ;; 'schema-generators.complete-test
-           )
+           'schema-generators.complete-test)
