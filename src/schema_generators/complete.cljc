@@ -41,8 +41,9 @@
 
   schema.spec.collection.CollectionSpec
   (completer* [spec s sub-checker generator-opts]
-    (if #?(:clj (instance? clojure.lang.APersistentMap s)
-           :cljs (map? s)) ;; todo: pluggable
+    (if (instance? #?(:clj clojure.lang.APersistentMap
+                      :cljs cljs.core/PersistentArrayMap)
+                   s) ;; todo: pluggable
       (let [g (apply generators/generator s generator-opts)]
         (fn map-completer [x]
           (if (= +missing+ x)
