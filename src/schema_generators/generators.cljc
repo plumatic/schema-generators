@@ -1,8 +1,5 @@
 (ns schema-generators.generators
-  "(Very) experimental support for compiling schemas to test.check generators.
-   To use it, you must provide your own test.check dependency.
-
-   TODO: add cljs support."
+  "(Very) experimental support for compiling schemas to test.check generators."
   (:require
    [clojure.test.check.generators :as generators]
    [schema.spec.core :as spec :include-macros true]
