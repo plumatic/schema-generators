@@ -39,12 +39,17 @@ Completion supports all of the extensibility of generators, plus the ability to 
 test data generation.  See [`schema-generators.complete-test`](https://github.com/plumatic/schema/blob/master/test/clj/schema/experimental/complete_test.clj)
 for examples.
 
+## Testing
+
+* Clojure - `lein test`
+* ClojureScript - [doo](https://github.com/bensu/doo) is used for running cljs tests. After [setting up your environment](https://github.com/bensu/doo#setting-up-environments),
+run `lein doo {js-env} test`
 
 ## Community
 
 Please feel free to join the Plumbing [mailing list](https://groups.google.com/forum/#!forum/prismatic-plumbing) to ask questions or discuss how you're using Schema.
 
-We welcome contributions in the form of bug reports and pull requests; please see `CONTRIBUTING.md` in the repo root for guidelines.  
+We welcome contributions in the form of bug reports and pull requests; please see `CONTRIBUTING.md` in the repo root for guidelines.
 
 ## Supported Clojure versions
 
