@@ -1,12 +1,14 @@
 (ns schema-generators.generators-test
-  (:use clojure.test)
+  #?(:clj (:use clojure.test))
   (:require
-   [clojure.test.check.properties :as properties]
+   #?(:cljs [cljs.test :refer-macros [deftest is testing run-tests]])
+   [clojure.test.check]
+   [clojure.test.check.properties :as properties :include-macros true]
    [clojure.test.check.generators :as check-generators]
-   [clojure.test.check.clojure-test :as check-clojure-test]
-   [schema.core :as s]
+   [clojure.test.check.clojure-test #?@(:clj [:refer [defspec]]
+                                        :cljs [:refer-macros [defspec]])]
+   [schema.core :as s :include-macros true]
    [schema-generators.generators :as generators]))
-
 
 (def OGInner
   {(s/required-key "l") [s/Int]
@@ -37,15 +39,17 @@
     (is (s/validate [FinalSchema] res))))
 
 (deftest simple-leaf-generators-smoke-test
-  (doseq [leaf-schema [double float long int short char byte boolean
-                       Double Float Long Integer Short Character Byte Boolean
-                       doubles floats longs ints shorts chars bytes booleans
-                       s/Str String s/Bool s/Num s/Int s/Keyword s/Symbol s/Inst
-                       Object s/Any s/Uuid (s/eq "foo") (s/enum :a :b :c)]]
-    (testing (str leaf-schema)
-      (is (= 10 (count (generators/sample 10 leaf-schema)))))))
+  (doseq [leaf-schema [#?@(:clj [double float long int short char byte boolean
+                                 Double Float Long Integer Short Character Byte Boolean
+                                 doubles floats longs ints shorts chars bytes booleans
+                                 String Object]
+                           :cljs [js/Object])
+                       s/Str s/Bool s/Num s/Int s/Keyword s/Symbol s/Inst
+                       s/Any s/Uuid (s/eq "foo") (s/enum :a :b :c)]]
+      (testing (str leaf-schema)
+        (is (= 10 (count (generators/sample 10 leaf-schema)))))))
 
-(check-clojure-test/defspec spec-test
-  100
+(defspec spec-test
+  50
   (properties/for-all [x (generators/generator OGSchema)]
                       (not (s/check OGSchema x))))
