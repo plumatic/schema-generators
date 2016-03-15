@@ -13,7 +13,8 @@
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}}
 
   :aliases {"all" ["with-profile" "dev:dev,1.7"]
-            "deploy" ["do" "clean," "deploy" "clojars"]}
+            "deploy" ["do" "clean," "deploy" "clojars"]
+            "test" ["do"  "clean," "test," "doo" "phantom" "test" "once"]}
 
   :plugins [[lein-cljsbuild "1.1.3"]
             [lein-doo "0.1.6"]]
