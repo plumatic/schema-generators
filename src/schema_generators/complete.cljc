@@ -31,9 +31,8 @@
   (completer* [spec s sub-checker generator-opts]
     (let [g (apply generators/generator s generator-opts)]
       (if #?(:clj (and (class? s) (isa? s clojure.lang.IRecord) (utils/class-schema s))
-             :cljs (and
-                    ;; TODO: more predicates for cljs record schema?
-                    (utils/class-schema s)))
+             :cljs (when-let [cs (utils/class-schema s)]
+                     (instance? schema.core.Record cs)))
         (fn record-completer [x]
           (sub-checker (into (sample g) x)))
         (fn variant-completer [x]
