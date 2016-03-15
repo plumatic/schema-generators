@@ -12,8 +12,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Private helpers for composite schemas
-;; (enable-console-print!)
-;; (print macros/safe-get)
 
 (defn g-by [f & args]
   (generators/fmap
