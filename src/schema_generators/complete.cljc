@@ -1,6 +1,5 @@
 (ns schema-generators.complete
-  "(Extremely) experimental support for 'completing' partial datums to match
-   a schema. To use it, you must provide your own test.check dependency."
+  "Experimental support for 'completing' partial datums to match a schema."
   (:require
    [clojure.test.check.generators :as check-generators]
    [schema.spec.core :as spec]
@@ -30,9 +29,8 @@
   schema.spec.variant.VariantSpec
   (completer* [spec s sub-checker generator-opts]
     (let [g (apply generators/generator s generator-opts)]
-      (if #?(:clj (and (class? s) (isa? s clojure.lang.IRecord) (utils/class-schema s))
-             :cljs (when-let [cs (utils/class-schema s)]
-                     (instance? schema.core.Record cs)))
+      (if (when-let [cs (utils/class-schema s)]
+            (instance? schema.core.Record cs))
         (fn record-completer [x]
           (sub-checker (into (sample g) x)))
         (fn variant-completer [x]
@@ -42,8 +40,7 @@
 
   schema.spec.collection.CollectionSpec
   (completer* [spec s sub-checker generator-opts]
-    (if (instance? #?(:clj clojure.lang.APersistentMap
-                      :cljs cljs.core/PersistentArrayMap)
+    (if (instance? #?(:clj clojure.lang.APersistentMap :cljs cljs.core/PersistentArrayMap)
                    s) ;; todo: pluggable
       (let [g (apply generators/generator s generator-opts)]
         (fn map-completer [x]
