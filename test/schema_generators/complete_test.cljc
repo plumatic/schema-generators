@@ -19,6 +19,13 @@
       (is (= "test" (complete/complete "test" s)))
       (is (integer? (:foo (complete/complete {} s)))))))
 
+(deftest optional-key-complete-test
+  (let [s {:a s/Int (s/optional-key :b) s/Str}
+        ex-without-optional-keys (complete/complete {} s {} {} {} false)
+        ex-including-optional-keys (complete/complete {} s {} {} {} true)]
+    (is (nil? (:b ex-without-optional-keys)))
+    (is (string? (:b ex-including-optional-keys)))))
+
 (s/defschema Animal
   (abstract-map/abstract-map-schema
    :type

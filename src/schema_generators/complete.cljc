@@ -19,15 +19,17 @@
 ;;; Private helpers
 
 (defprotocol Completer
-  (completer* [spec s sub-checker generator-opts]
-    "A function applied to a datum as part of coercion to complete missing fields."))
+  (completer* [spec s sub-checker generator-opts include-optional?]
+    "A function applied to a datum as part of coercion to complete missing fields.
+
+    Entries with optional fields will be generated when `include-optional?` is set"))
 
 (defn sample [g]
   (check-generators/generate g 10))
 
 (extend-protocol Completer
   schema.spec.variant.VariantSpec
-  (completer* [spec s sub-checker generator-opts]
+  (completer* [spec s sub-checker generator-opts include-optional?]
     (let [g (apply generators/generator s generator-opts)]
       (if (when-let [cs (utils/class-schema s)]
             (instance? schema.core.Record cs))
@@ -39,10 +41,13 @@
             (sub-checker x))))))
 
   schema.spec.collection.CollectionSpec
-  (completer* [spec s sub-checker generator-opts]
+  (completer* [spec s sub-checker generator-opts include-optional?]
     (if (instance? #?(:clj clojure.lang.APersistentMap :cljs cljs.core/PersistentArrayMap)
                    s) ;; todo: pluggable
-      (let [g (apply generators/generator s generator-opts)]
+      (let [g (apply generators/generator s generator-opts)
+            required-filter (if include-optional?
+                              identity
+                              #(filter s/required-key? %))]
         (fn map-completer [x]
           (if (= +missing+ x)
             (sample g)
@@ -50,7 +55,7 @@
             (let [ks (distinct (concat (keys x)
                                        (->> s
                                             keys
-                                            (filter s/required-key?)
+                                            required-filter
                                             (map s/explicit-schema-key))))]
               (sub-checker
                (into {} (for [k ks] [k (get x k +missing+)])))))))
@@ -61,7 +66,7 @@
             (sub-checker x))))))
 
   schema.spec.leaf.LeafSpec
-  (completer* [spec s sub-checker generator-opts]
+  (completer* [spec s sub-checker generator-opts include-optional?]
     (let [g (apply generators/generator s generator-opts)]
       (fn leaf-completer [x]
         (if (= +missing+ x)
@@ -82,11 +87,17 @@
     coercion-matcher :- coerce/CoercionMatcher
     leaf-generators :- generators/LeafGenerators
     wrappers :- generators/GeneratorWrappers]
+   (completer schema coercion-matcher leaf-generators wrappers false))
+  ([schema
+    coercion-matcher :- coerce/CoercionMatcher
+    leaf-generators :- generators/LeafGenerators
+    wrappers :- generators/GeneratorWrappers
+    include-optional? :- s/Bool]
    (spec/run-checker
     (fn [s params]
       (let [c (spec/checker (s/spec s) params)
             coercer (or (coercion-matcher s) identity)
-            completr (completer* (s/spec s) s c [leaf-generators wrappers])]
+            completr (completer* (s/spec s) s c [leaf-generators wrappers] include-optional?)]
         (fn [x]
           (macros/try-catchall
            (let [v (coercer x)]
