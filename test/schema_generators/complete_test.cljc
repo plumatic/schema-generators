@@ -21,10 +21,19 @@
 
 (deftest optional-key-complete-test
   (let [s {:a s/Int (s/optional-key :b) s/Str}
-        ex-without-optional-keys (complete/complete {} s {} {} {} false)
-        ex-including-optional-keys (complete/complete {} s {} {} {} true)]
-    (is (nil? (:b ex-without-optional-keys)))
-    (is (string? (:b ex-including-optional-keys)))))
+        without-opt-keys (complete/complete {} s {} {} {})
+        including-opt-keys (complete/complete {} s {} {} {} {:include-optional? true})]
+    (is (not (contains? without-opt-keys :b)))
+    (is (string? (:b including-opt-keys)))))
+
+(deftest nested-optional-key-complete-test
+  (let [inner-schema {(s/optional-key :inner) s/Str}
+        outer-schema {:outer-a s/Int :outer-b inner-schema}
+        without-opt-keys (complete/complete {} outer-schema {} {} {:include-optional? false})
+        including-opt-keys (complete/complete {} outer-schema {} {} {} {:include-optional? true})]
+    ;; TODO: this test fails (non-deterministically) due to bug in the implementation
+    (is (not (contains? (:outer-b without-opt-keys) :inner)))
+    (is (string? (-> including-opt-keys :outer-b :inner)))))
 
 (s/defschema Animal
   (abstract-map/abstract-map-schema
