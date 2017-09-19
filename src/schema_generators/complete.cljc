@@ -42,15 +42,17 @@
   (completer* [spec s sub-checker generator-opts]
     (if (instance? #?(:clj clojure.lang.APersistentMap :cljs cljs.core/PersistentArrayMap)
                    s) ;; todo: pluggable
-      (let [g (apply generators/generator s generator-opts)]
+      (let [g (apply generators/generator s generator-opts)
+            required-filter (if (-> generator-opts last :include-optional?)
+                              identity
+                              #(filter s/required-key? %))]
         (fn map-completer [x]
           (if (= +missing+ x)
             (sample g)
-            ;; for now, just do required keys when user provides input.
             (let [ks (distinct (concat (keys x)
                                        (->> s
                                             keys
-                                            (filter s/required-key?)
+                                            required-filter
                                             (map s/explicit-schema-key))))]
               (sub-checker
                (into {} (for [k ks] [k (get x k +missing+)])))))))
@@ -82,11 +84,17 @@
     coercion-matcher :- coerce/CoercionMatcher
     leaf-generators :- generators/LeafGenerators
     wrappers :- generators/GeneratorWrappers]
+   (completer schema coercion-matcher leaf-generators wrappers {}))
+  ([schema
+    coercion-matcher :- coerce/CoercionMatcher
+    leaf-generators :- generators/LeafGenerators
+    wrappers :- generators/GeneratorWrappers
+    aux-generator-opts :- {s/Keyword s/Any}]
    (spec/run-checker
     (fn [s params]
       (let [c (spec/checker (s/spec s) params)
             coercer (or (coercion-matcher s) identity)
-            completr (completer* (s/spec s) s c [leaf-generators wrappers])]
+            completr (completer* (s/spec s) s c [leaf-generators wrappers aux-generator-opts])]
         (fn [x]
           (macros/try-catchall
            (let [v (coercer x)]

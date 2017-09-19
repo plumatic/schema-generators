@@ -37,9 +37,10 @@
   (if (vector? e)
     (case (first e)
       :schema.spec.collection/optional
-      (generators/one-of
-       [(generators/return nil)
-        (elements-generator (next e) params)])
+      (let [choices (if (:include-optional? params)
+                      [(elements-generator (next e) params)]
+                      [(generators/return nil) (elements-generator (next e) params)])]
+        (generators/one-of choices))
 
       :schema.spec.collection/remaining
       (do (macros/assert! (= 2 (count e)) "remaining can have only one schema.")
@@ -204,6 +205,11 @@
   ([schema :- Schema
     leaf-generators :- LeafGenerators
     wrappers :- GeneratorWrappers]
+   (generator schema leaf-generators wrappers {}))
+  ([schema :- Schema
+    leaf-generators :- LeafGenerators
+    wrappers :- GeneratorWrappers
+    auxilary-opts :- {s/Keyword s/Any}]
      (let [leaf-generators (default-leaf-generators leaf-generators)
            gen (fn [s params]
                  ((or (wrappers s) identity)
@@ -211,8 +217,10 @@
                       (composite-generator (s/spec s) params))))]
        (generators/fmap
         (s/validator schema)
-        (gen schema {:subschema-generator gen :cache #?(:clj (java.util.IdentityHashMap.)
-                                                        :cljs (atom {}))})))))
+        (gen schema (merge {:subschema-generator gen
+                            :cache #?(:clj (java.util.IdentityHashMap.)
+                                      :cljs (atom {}))}
+                           auxilary-opts))))))
 
 (s/defn sample :- [s/Any]
   "Sample k elements from generator."
