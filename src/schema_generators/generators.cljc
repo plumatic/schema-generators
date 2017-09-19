@@ -2,6 +2,7 @@
   "Experimental support for compiling schemas to test.check generators."
   (:require
    [clojure.test.check.generators :as generators]
+   [clojure.test.check.rose-tree :as rose]
    [schema.spec.core :as spec :include-macros true]
    schema.spec.collection
    schema.spec.leaf
@@ -223,3 +224,17 @@
   "Sample a single element of low to moderate size."
   [& generator-args]
   (generators/generate (apply generator generator-args) 10))
+
+(s/defn generate-alt :- s/Any
+  "Sample a single element
+
+  Providing the same random seed will give the same result"
+  ([schema random-seed] (generate-alt schema random-seed 10))
+  ([schema random-seed size] (generate-alt schema random-seed size {} {}))
+  ([schema :- Schema
+    random-seed
+    size :- s/Int
+    leaf-generators :- LeafGenerators
+    wrappers :- GeneratorWrappers]
+   (let [gen (generator schema leaf-generators wrappers)]
+     (rose/root (generators/call-gen gen random-seed size)))))

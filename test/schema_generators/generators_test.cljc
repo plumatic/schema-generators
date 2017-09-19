@@ -5,6 +5,7 @@
    [clojure.test.check]
    [clojure.test.check.properties :as properties :include-macros true]
    [clojure.test.check.generators :as check-generators]
+   [clojure.test.check.random :as random]
    [clojure.test.check.clojure-test #?@(:clj [:refer [defspec]]
                                         :cljs [:refer-macros [defspec]])]
    [schema.core :as s :include-macros true]
@@ -64,3 +65,15 @@
   50
   (properties/for-all [x (generators/generator OGSchema)]
                       (not (s/check OGSchema x))))
+
+(deftest generate-alt-test
+  (let [random-seed (random/make-random)
+        other-seed  (random/make-random)
+        res-a (generators/generate-alt OGSchema random-seed 15)
+        res-b (generators/generate-alt OGSchema random-seed 15)
+        res-c (generators/generate-alt OGSchema random-seed 10)
+        res-d (generators/generate-alt OGSchema other-seed 15)]
+    (is (= res-a res-b) "samples generated with same seed and size are the same")
+    (is (not (= res-a res-c)) "samples generated with same seed and diff. size are diff.")
+    (is (not (= res-a res-d)) "samples generated with diff. seed and same size are diff.")
+    (is (s/validate OGSchema res-a))))
