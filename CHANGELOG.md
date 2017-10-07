@@ -1,4 +1,4 @@
-## 0.1.3
+## 0.1.2
  * Bump to `prismatic/schema 1.1.7`
 
 ## 0.1.1
