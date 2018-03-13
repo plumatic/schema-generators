@@ -64,3 +64,7 @@
   50
   (properties/for-all [x (generators/generator OGSchema)]
                       (not (s/check OGSchema x))))
+
+(defspec readable-symbols-spec 1000
+  (properties/for-all [x (generators/generator s/Symbol)]
+    (-> x str read-string (= x))))
