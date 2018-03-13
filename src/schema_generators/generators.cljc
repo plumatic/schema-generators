@@ -128,7 +128,7 @@
     s/Keyword generators/keyword
     #?(:clj clojure.lang.Keyword
        :cljs cljs.core/Keyword) generators/keyword
-    s/Symbol (generators/fmap (comp symbol name) generators/keyword)
+    s/Symbol generators/symbol
     #?(:clj Object :cljs js/Object) generators/any
     s/Any generators/any
     s/Uuid generators/uuid
