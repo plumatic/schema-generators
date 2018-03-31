@@ -2,6 +2,7 @@
   #?(:clj (:use clojure.test))
   (:require
    #?(:cljs [cljs.test :refer-macros [deftest is testing run-tests]])
+   #?(:cljs [cljs.reader :refer [read-string]])
    [clojure.test.check]
    [clojure.test.check.properties :as properties :include-macros true]
    [clojure.test.check.generators :as check-generators]
