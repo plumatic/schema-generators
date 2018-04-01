@@ -9,7 +9,8 @@
 
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
                                   [org.clojure/clojurescript "1.7.228"]]
-                   :plugins [[lein-codox "0.9.4"]]}
+                   :plugins [[lein-codox "0.9.4"]
+                             [lein-release/lein-release "1.0.4"]]}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}}
 
   :aliases {"all" ["with-profile" "dev:dev,1.7"]
