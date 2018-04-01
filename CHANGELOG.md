@@ -1,5 +1,9 @@
-## 0.1.2
+## 0.1.2 (`2018-04-01`)
  * Bump to `prismatic/schema 1.1.7`
+ * Default keyword and symbol generators now include namespaced
+   keywords and symbols
+ * Fix bug in symbol generator that allowed it to generate
+   unreadable symbols
 
 ## 0.1.1
  * Fix compatibility with latest Clojure 1.9 alpha and its stricter namespaced keyword handling
