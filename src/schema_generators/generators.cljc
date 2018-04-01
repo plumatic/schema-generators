@@ -127,8 +127,8 @@
                       (generators/fmap bigint generators/large-integer)])])
     s/Keyword generators/keyword
     #?(:clj clojure.lang.Keyword
-       :cljs cljs.core/Keyword) generators/keyword
-    s/Symbol generators/symbol
+       :cljs cljs.core/Keyword) (generators/one-of [generators/keyword generators/keyword-ns])
+    s/Symbol (generators/one-of [generators/symbol generators/symbol-ns])
     #?(:clj Object :cljs js/Object) generators/any
     s/Any generators/any
     s/Uuid generators/uuid
