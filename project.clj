@@ -8,17 +8,18 @@
                  [prismatic/schema "1.1.7"]]
 
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
-                                  [org.clojure/clojurescript "1.7.228"]]
+                                  [org.clojure/clojurescript "1.10.520"]]
                    :plugins [[lein-codox "0.9.4"]
                              [lein-release/lein-release "1.0.4"]]}
-             :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
+             :1.10 {:dependencies [[org.clojure/clojure "1.10.0"]]}}
 
-  :aliases {"all" ["with-profile" "dev:dev,1.7"]
+  :aliases {"all" ["with-profile" "dev:dev,1.9:dev,1.10"]
             "deploy" ["do" "clean," "deploy" "clojars"]
-            "test" ["do"  "clean," "test," "doo" "phantom" "test" "once"]}
+            "test" ["do"  "clean," "test," "doo" "node" "test" "once"]}
 
-  :plugins [[lein-cljsbuild "1.1.3"]
-            [lein-doo "0.1.6"]]
+  :plugins [[lein-cljsbuild "1.1.7"]
+            [lein-doo "0.1.10"]]
 
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src"]
@@ -29,6 +30,7 @@
                         :source-paths ["src" "test"]
                         :compiler {:output-to "target/js/schema_generators_test.js"
                                    :main schema-generators.runner
+                                   :target :nodejs
                                    :optimizations :none}}
                        {:id "release"
                         :source-paths ["src"]
