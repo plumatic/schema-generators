@@ -69,3 +69,14 @@
 (defspec readable-symbols-spec 1000
   (properties/for-all [x (generators/generator s/Symbol)]
     (-> x str read-string (= x))))
+
+(def Issue16RegressionSchema
+  "A map where the wildcard keys are likely to collide with the
+  specific keys."
+  {:x                s/Int
+   (s/enum :x :y :z) s/Bool})
+
+;; regression test for issue #16
+(defspec can-mix-wildcard-keys-with-specific-keys 50
+  (properties/for-all [m (generators/generator Issue16RegressionSchema)]
+    (is (number? (:x m)))))
