@@ -4,6 +4,8 @@ A Clojure(Script) library for data generation and generative testing with [https
 
 [![Clojars Project](http://clojars.org/prismatic/schema-generators/latest-version.svg)](http://clojars.org/prismatic/schema-generators)
 
+[![Circle CI](https://circleci.com/gh/plumatic/schema-generators.svg?style=svg)](https://circleci.com/gh/plumatic/schema-generators)
+
 **This is an alpha release. The API and organizational structure are
 subject to change. Comments and contributions are much appreciated.**
 
