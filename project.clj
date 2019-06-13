@@ -1,4 +1,4 @@
-(defproject prismatic/schema-generators "0.1.3"
+(defproject prismatic/schema-generators "0.1.4-SNAPSHOT"
   :description "Clojure(Script) library for data generation from schemas"
   :url "http://github.com/plumatic/schema-generators"
   :license {:name "Eclipse Public License"
