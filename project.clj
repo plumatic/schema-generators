@@ -5,10 +5,16 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/test.check "0.9.0"]
-                 [prismatic/schema "1.1.11"]]
+                 [prismatic/schema "1.1.12"]]
 
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
-                                  [org.clojure/clojurescript "1.10.520"]]
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.10.0"]
+                                  [org.clojure/clojurescript
+                                   #_"1.10.597" ;; PASS? WHY?
+                                   "1.10.738" ;; FAIL
+                                   #_"1.10.739" ;; FAIL
+                                   #_"1.10.742" ;; FAIL
+                                   #_"1.10.773" ;; FAIL
+                                   ]]
                    :plugins [[lein-codox "0.9.4"]
                              [lein-release/lein-release "1.0.4"]]}
              :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
@@ -18,7 +24,7 @@
             "deploy" ["do" "clean," "deploy" "clojars"]
             "test" ["do"  "clean," "test," "doo" "node" "test" "once"]}
 
-  :plugins [[lein-cljsbuild "1.1.7"]
+  :plugins [[lein-cljsbuild "1.1.8"]
             [lein-doo "0.1.10"]]
 
   :cljsbuild {:builds [{:id "dev"
