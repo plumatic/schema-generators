@@ -4,8 +4,9 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
+  :exclusions [prismatic/schema]
   :dependencies [[org.clojure/test.check "0.9.0"]
-                 [prismatic/schema "1.1.11"]]
+                 [org.clojars.frenchy64/schema "1.1.13-20211021.171347-1"]]
 
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
                                   [org.clojure/clojurescript "1.10.520"]]
