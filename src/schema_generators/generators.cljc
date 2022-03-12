@@ -132,7 +132,7 @@
     #?(:clj Object :cljs js/Object) generators/any
     s/Any generators/any
     s/Uuid generators/uuid
-    s/Inst (generators/fmap (fn [ms] (#?(:clj java.util.Date. :cljs js/Date.) ms)) generators/int)}
+    s/Inst (generators/fmap (fn [ms] (#?(:clj java.util.Date. :cljs js/Date.) ^long ms)) generators/int)}
    #?(:clj (into {}
                  (for [[f ctor c] [[doubles double-array Double]
                                    [floats float-array Float]
@@ -154,7 +154,7 @@
 
 (defn enum-generators [s]
   (when (instance? schema.core.EnumSchema s)
-    (let [vs (vec (.-vs ^schema.core.EqSchema s))]
+    (let [vs (vec (.-vs ^schema.core.EnumSchema s))]
       (generators/fmap #(nth vs %) (generators/choose 0 (dec (count vs)))))))
 
 
