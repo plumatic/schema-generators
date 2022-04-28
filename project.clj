@@ -5,7 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/test.check "0.9.0"]
-                 [prismatic/schema "1.1.11"]]
+                 [prismatic/schema "1.2.1-SNAPSHOT"]]
 
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
                                   [org.clojure/clojurescript "1.10.520"]]

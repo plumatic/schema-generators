@@ -78,7 +78,7 @@
   (composite-generator [s params]
     (generators/such-that
      (complement (.-pre ^schema.spec.collection.CollectionSpec s))
-     (generators/fmap (:constructor s) (elements-generator (:elements s) params))))
+     (generators/fmap (:konstructor s) (elements-generator (:elements s) params))))
 
   schema.spec.leaf.LeafSpec
   (composite-generator [s params]
