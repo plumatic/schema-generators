@@ -1,5 +1,8 @@
-## 0.1.4 (`2022-04-29`)
+## 0.1.5 (`2022-04-29`)
  * Compatibility with latest ClojureScript and `prismatic/schema 1.2.1`
+
+## 0.1.4 (`2022-03-16`)
+ * Remove some accidental usages of reflection
 
 ## 0.1.3 (`2019-06-12`)
  * Bump to `prismatic/schema 1.1.11` (fixes [#16](https://github.com/plumatic/schema-generators/issues/16))
