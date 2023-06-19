@@ -48,6 +48,17 @@
 
 (defn elements-generator [elts params]
   (->> elts
+       ;; move schema keys to the front for map generators, so they
+       ;; don't override the specific keys; this is probably still
+       ;; wrong when optional keys are present
+       (map-indexed (fn [idx elt]
+                      [idx elt]))
+       (sort-by (fn [[idx elt]]
+                  (if (and (vector? elt)
+                           (= :schema.spec.collection/remaining (first elt)))
+                    [0 idx]
+                    [1 idx])))
+       (map second)
        (map #(element-generator % params))
        (apply generators/tuple)
        (generators/fmap (partial apply concat))))
@@ -72,8 +83,6 @@
           (generators/such-that g (sub-generator o params))
           (sub-generator o params))))))
 
-  ;; TODO: this does not currently capture proper semantics of maps with
-  ;; both specific keys and key schemas that can override them.
   schema.spec.collection.CollectionSpec
   (composite-generator [s params]
     (generators/such-that
