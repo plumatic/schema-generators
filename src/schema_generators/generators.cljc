@@ -208,9 +208,9 @@
   ([schema]
    (generator schema {:max-retries 10}))
   ([schema opts]
-     (generator schema opts {}))
+   (generator schema opts {}))
   ([schema opts leaf-generators]
-     (generator schema opts leaf-generators {}))
+   (generator schema opts leaf-generators {}))
   ([schema :- Schema
     opts :- Options
     leaf-generators :- LeafGenerators
