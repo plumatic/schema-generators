@@ -64,8 +64,8 @@
        (let [pre (.-pre ^schema.spec.variant.VariantSpec s)
              post (.-post ^schema.spec.variant.VariantSpec s)]
          (not
-           (or (pre x)
-               (and post (post x))))))
+          (or (pre x)
+              (and post (post x))))))
      (generators/one-of
        (for [o (macros/safe-get s :options)]
          (if-let [g (:guard o)]
@@ -77,7 +77,7 @@
   ;; both specific keys and key schemas that can override them.
   schema.spec.collection.CollectionSpec
   (composite-generator [s params]
-   (generators/such-that
+    (generators/such-that
      (complement (.-pre ^schema.spec.collection.CollectionSpec s))
      (generators/fmap (:konstructor s) (elements-generator (:elements s) params))
      (:max-retries params)))
@@ -131,9 +131,9 @@
     s/Bool generators/boolean
     s/Num (generators/one-of [generators/large-integer generators/double])
     s/Int (generators/one-of
-            [generators/large-integer
-             #?@(:clj [(generators/fmap unchecked-int generators/large-integer)
-                       (generators/fmap bigint generators/large-integer)])])
+           [generators/large-integer
+            #?@(:clj [(generators/fmap unchecked-int generators/large-integer)
+                      (generators/fmap bigint generators/large-integer)])])
     s/Keyword generators/keyword
     #?(:clj clojure.lang.Keyword
        :cljs cljs.core/Keyword) (generators/one-of [generators/keyword generators/keyword-ns])
@@ -153,8 +153,8 @@
                                    [booleans boolean-array Boolean]]]
                    [f (generators/fmap ctor
                                        (generators/vector
-                                         (macros/safe-get
-                                           +primitive-generators+ c)))])))))
+                                        (macros/safe-get
+                                         +primitive-generators+ c)))])))))
 
 
 (defn eq-generators [s]
