@@ -54,33 +54,33 @@
 
 
 (defprotocol CompositeGenerator
-  (composite-generator [s params opts]))
+  (composite-generator [s params]))
 
 (extend-protocol CompositeGenerator
   schema.spec.variant.VariantSpec
-  (composite-generator [s params opts]
+  (composite-generator [s params]
     (generators/such-that
      (fn [x]
        (let [pre (.-pre ^schema.spec.variant.VariantSpec s)
              post (.-post ^schema.spec.variant.VariantSpec s)]
          (not
-          (or (pre x)
-              (and post (post x))))))
+           (or (pre x)
+               (and post (post x))))))
      (generators/one-of
-      (for [o (macros/safe-get s :options)]
-        (if-let [g (:guard o)]
-          (generators/such-that g (sub-generator o params) (:max-retries opts))
-          (sub-generator o params))))
-     (:max-retries opts)))
+       (for [o (macros/safe-get s :options)]
+         (if-let [g (:guard o)]
+           (generators/such-that g (sub-generator o params) (:max-retries params))
+           (sub-generator o params))))
+     (:max-retries params)))
 
   ;; TODO: this does not currently capture proper semantics of maps with
   ;; both specific keys and key schemas that can override them.
   schema.spec.collection.CollectionSpec
-  (composite-generator [s params opts]
-    (generators/such-that
+  (composite-generator [s params]
+   (generators/such-that
      (complement (.-pre ^schema.spec.collection.CollectionSpec s))
      (generators/fmap (:konstructor s) (elements-generator (:elements s) params))
-     (:max-retries opts)))
+     (:max-retries params)))
 
   schema.spec.leaf.LeafSpec
   (composite-generator [s _]
@@ -102,6 +102,9 @@
   "A map of options to interact with core generator behaviors"
   {:max-retries s/Int})
 
+(def SchemaOptions
+  "A mapping from schemas to options used by generators"
+  (s/=> (s/maybe Options) Schema))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
@@ -128,9 +131,9 @@
     s/Bool generators/boolean
     s/Num (generators/one-of [generators/large-integer generators/double])
     s/Int (generators/one-of
-           [generators/large-integer
-            #?@(:clj [(generators/fmap unchecked-int generators/large-integer)
-                      (generators/fmap bigint generators/large-integer)])])
+            [generators/large-integer
+             #?@(:clj [(generators/fmap unchecked-int generators/large-integer)
+                       (generators/fmap bigint generators/large-integer)])])
     s/Keyword generators/keyword
     #?(:clj clojure.lang.Keyword
        :cljs cljs.core/Keyword) (generators/one-of [generators/keyword generators/keyword-ns])
@@ -150,8 +153,8 @@
                                    [booleans boolean-array Boolean]]]
                    [f (generators/fmap ctor
                                        (generators/vector
-                                        (macros/safe-get
-                                         +primitive-generators+ c)))])))))
+                                         (macros/safe-get
+                                           +primitive-generators+ c)))])))))
 
 
 (defn eq-generators [s]
@@ -206,24 +209,28 @@
    constraints is an optional mapping from schema to wrappers for the default generators,
    which can impose constraints, fix certain values, etc."
   ([schema]
-   (generator schema {:max-retries 10}))
-  ([schema opts]
-   (generator schema opts {}))
-  ([schema opts leaf-generators]
-   (generator schema opts leaf-generators {}))
+   (generator schema {}))
+  ([schema leaf-generators]
+   (generator schema leaf-generators {}))
   ([schema :- Schema
-    opts :- Options
     leaf-generators :- LeafGenerators
     wrappers :- GeneratorWrappers]
+   (generator schema leaf-generators wrappers {}))
+  ([schema :- Schema
+    leaf-generators :- LeafGenerators
+    wrappers :- GeneratorWrappers
+    options :- SchemaOptions]
    (let [leaf-generators (default-leaf-generators leaf-generators)
          gen (fn [s params]
                ((or (wrappers s) identity)
                 (or (leaf-generators s)
-                    (composite-generator (s/spec s) params opts))))]
+                    (composite-generator (s/spec s) params))))
+         params (merge {:subschema-generator gen :cache #?(:clj (java.util.IdentityHashMap.)
+                                                           :cljs (atom {}))}
+                       (or (options schema) {:max-retries 10}))]
      (generators/fmap
        (s/validator schema)
-       (gen schema {:subschema-generator gen :cache #?(:clj (java.util.IdentityHashMap.)
-                                                       :cljs (atom {}))})))))
+       (gen schema params)))))
 
 (s/defn sample :- [s/Any]
   "Sample k elements from generator."

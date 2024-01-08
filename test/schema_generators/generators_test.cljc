@@ -86,15 +86,21 @@
   (s/conditional
     int? s/Str))
 
-(deftest maximum-retries-test
+(deftest validate-maximum-retries-test
   (is (thrown-with-msg?
         ExceptionInfo #"Couldn't satisfy such-that predicate after 100 tries."
-        (generators/generate FailRetries {:max-retries 100})))
-
-  (is (thrown-with-msg?
-        ExceptionInfo #"Couldn't satisfy such-that predicate after 50 tries."
-        (generators/generate FailRetries {:max-retries 50})))
+        (generators/generate FailRetries {} {} {FailRetries {:max-retries 100}})))
 
   (is (thrown-with-msg?
         ExceptionInfo #"Couldn't satisfy such-that predicate after 10 tries."
         (generators/generate FailRetries))))
+
+(deftest validate-generation-before-maximum-retries
+  (let [retries (atom 0)
+        target (rand-int 100)
+        counter (fn [candidate]
+                  (swap! retries inc)
+                  (when (< target @retries)
+                    candidate))
+        ToGenerate (s/conditional counter s/Str)]
+    (is (string? (generators/generate ToGenerate {} {} {ToGenerate {:max-retries 100}})))))
