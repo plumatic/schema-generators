@@ -10,7 +10,7 @@
                                          :cljs [:refer-macros [defspec]])]
     [schema.core :as s :include-macros true]
     [schema-generators.generators :as generators])
-  (:import (clojure.lang ExceptionInfo)))
+  #?(:clj (:import (clojure.lang ExceptionInfo))))
 
 (def OGInner
   {(s/required-key "l") [s/Int]

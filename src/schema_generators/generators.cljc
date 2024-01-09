@@ -69,9 +69,9 @@
      (generators/one-of
        (for [o (macros/safe-get s :options)]
          (if-let [g (:guard o)]
-           (generators/such-that g (sub-generator o params) (:max-retries params))
+           (generators/such-that g (sub-generator o params) (get params :max-retries 10))
            (sub-generator o params))))
-     (:max-retries params)))
+     (get params :max-retries 10)))
 
   ;; TODO: this does not currently capture proper semantics of maps with
   ;; both specific keys and key schemas that can override them.
@@ -80,7 +80,7 @@
     (generators/such-that
      (complement (.-pre ^schema.spec.collection.CollectionSpec s))
      (generators/fmap (:konstructor s) (elements-generator (:elements s) params))
-     (:max-retries params)))
+     (get params :max-retries 10)))
 
   schema.spec.leaf.LeafSpec
   (composite-generator [s _]
@@ -224,13 +224,11 @@
          gen (fn [s params]
                ((or (wrappers s) identity)
                 (or (leaf-generators s)
-                    (composite-generator (s/spec s) params))))
-         params (merge {:subschema-generator gen :cache #?(:clj (java.util.IdentityHashMap.)
-                                                           :cljs (atom {}))}
-                       (or (options schema) {:max-retries 10}))]
+                    (composite-generator (s/spec s) (merge params (options s))))))]
      (generators/fmap
        (s/validator schema)
-       (gen schema params)))))
+       (gen schema {:subschema-generator gen :cache #?(:clj (java.util.IdentityHashMap.)
+                                                       :cljs (atom {}))})))))
 
 (s/defn sample :- [s/Any]
   "Sample k elements from generator."
