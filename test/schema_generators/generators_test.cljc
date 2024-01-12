@@ -1,15 +1,16 @@
 (ns schema-generators.generators-test
   #?(:clj (:use clojure.test))
   (:require
-   #?(:cljs [cljs.test :refer-macros [deftest is testing run-tests]])
-   #?(:cljs [cljs.reader :refer [read-string]])
-   [clojure.test.check]
-   [clojure.test.check.properties :as properties :include-macros true]
-   [clojure.test.check.generators :as check-generators]
-   [clojure.test.check.clojure-test #?@(:clj [:refer [defspec]]
-                                        :cljs [:refer-macros [defspec]])]
-   [schema.core :as s :include-macros true]
-   [schema-generators.generators :as generators]))
+    #?(:cljs [cljs.test :refer-macros [deftest is testing run-tests]])
+    #?(:cljs [cljs.reader :refer [read-string]])
+    [clojure.test.check]
+    [clojure.test.check.properties :as properties :include-macros true]
+    [clojure.test.check.generators :as check-generators]
+    [clojure.test.check.clojure-test #?@(:clj  [:refer [defspec]]
+                                         :cljs [:refer-macros [defspec]])]
+    [schema.core :as s :include-macros true]
+    [schema-generators.generators :as generators])
+  #?(:clj (:import (clojure.lang ExceptionInfo))))
 
 (def OGInner
   {(s/required-key "l") [s/Int]
@@ -80,3 +81,26 @@
 (defspec can-mix-wildcard-keys-with-specific-keys 50
   (properties/for-all [m (generators/generator Issue16RegressionSchema)]
     (is (number? (:x m)))))
+
+(def FailRetries
+  (s/conditional
+    int? s/Str))
+
+(deftest validate-maximum-retries-test
+  (is (thrown-with-msg?
+        ExceptionInfo #"Couldn't satisfy such-that predicate after 100 tries."
+        (generators/generate FailRetries {} {} {FailRetries {:max-retries 100}})))
+
+  (is (thrown-with-msg?
+        ExceptionInfo #"Couldn't satisfy such-that predicate after 10 tries."
+        (generators/generate FailRetries))))
+
+(deftest validate-generation-before-maximum-retries
+  (let [retries (atom 0)
+        target (rand-int 100)
+        counter (fn [candidate]
+                  (swap! retries inc)
+                  (when (< target @retries)
+                    candidate))
+        ToGenerate (s/conditional counter s/Str)]
+    (is (string? (generators/generate ToGenerate {} {} {ToGenerate {:max-retries 100}})))))

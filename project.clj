@@ -7,7 +7,7 @@
   :dependencies [[org.clojure/test.check "0.9.0"]
                  [prismatic/schema "1.2.1"]]
 
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.11.1"]
                                   [org.clojure/clojurescript "1.10.520"]]
                    :plugins [[lein-codox "0.9.4"]
                              [lein-release/lein-release "1.0.4"]]}
